@@ -14,8 +14,7 @@ spec:
     spec:
       containers:
         - name: crypto-api
-          # 🛑 TROQUE PELO SEU USUÁRIO DO DOCKER HUB
-          image: seu-usuario/crypto-api:v1 
+          image: augusto-idalgo/crypto-api:v1 
           ports:
             - containerPort: 5000
           env:

@@ -1,0 +1,70 @@
+# 1. A Senha (Secret)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+type: Opaque
+stringData:
+  # ATENÇÃO: Essa URL tem que bater com o Service do Postgres abaixo
+  DATABASE_URL: "postgresql://postgres:minhasenha123@postgres-service:5432/crypto_db"
+
+---
+# 2. O Disco (PVC)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 3. O Banco (Deployment)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "minhasenha123"
+            - name: POSTGRES_DB
+              value: "crypto_db"
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: pg-storage
+      volumes:
+        - name: pg-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+
+---
+# 4. A Rede Interna (Service)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service  # <--- O nome DNS que o Python vai usar
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

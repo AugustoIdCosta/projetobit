@@ -48,7 +48,8 @@ def get_history():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute('SELECT symbol, valor, timestamp FROM registro_valores ORDER BY timestamp DESC LIMIT 100;')
+        # A tabela foi criada com a coluna "created_at", não "timestamp"
+        cursor.execute('SELECT symbol, valor, created_at FROM registro_valores ORDER BY created_at DESC LIMIT 100;')
         rows = cursor.fetchall()
         
         # Transforma a lista do Banco em JSON bonitinho
@@ -57,6 +58,7 @@ def get_history():
             results.append({
                 "symbol": row[0],
                 "price": row[1],
+                # Mantemos a chave "timestamp" no JSON para compatibilidade
                 "timestamp": row[2]
             })
         cursor.close()

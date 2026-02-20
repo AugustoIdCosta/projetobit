@@ -45,10 +45,10 @@ def save_price(price):
     
     try:
         cur = conn.cursor()
-        # Inserimos apenas Symbol e Price. 
-        # O ID e o Timestamp o banco cria sozinho (definimos isso no CREATE TABLE da API)
+        # Inserimos na mesma tabela usada pela API: registro_valores
+        # Colunas: symbol, valor; id e created_at são gerados automaticamente
         cur.execute(
-            "INSERT INTO prices (symbol, price) VALUES (%s, %s)",
+            "INSERT INTO registro_valores (symbol, valor) VALUES (%s, %s)",
             ('BTC', price)
         )
         conn.commit()
@@ -58,7 +58,7 @@ def save_price(price):
     except Exception as e:
         print(f"Erro ao salvar no banco: {e}")
 
-# --- LOOP INFINITO (O CORAÇÃO DO WORKER) ---
+
 if __name__ == "__main__":
     print("🚀 Worker iniciado! Monitorando Bitcoin...")
     

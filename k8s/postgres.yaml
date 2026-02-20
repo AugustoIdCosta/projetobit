@@ -1,13 +1,3 @@
-# 1. A Senha (Secret)
-apiVersion: v1
-kind: Secret
-metadata:
-  name: db-credentials
-type: Opaque
-stringData:
-  # ATENÇÃO: Essa URL tem que bater com o Service do Postgres abaixo
-  DATABASE_URL: "postgresql://postgres:minhasenha123@postgres-service:5432/crypto_db"
-
 ---
 # 2. O Disco (PVC)
 apiVersion: v1

@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: crypto-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: crypto
+      POSTGRES_USER: crypto
+      POSTGRES_PASSWORD: crypto123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./app/api
+      dockerfile: Dockerfile
+    container_name: crypto-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://crypto:crypto123@postgres:5432/crypto
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+
+  worker:
+    build:
+      context: ./app/worker
+      dockerfile: Dockerfile
+    container_name: crypto-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://crypto:crypto123@postgres:5432/crypto
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Worker não expõe portas; roda em background salvando preços
+
+volumes:
+  postgres_data:
+
